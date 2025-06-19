@@ -40,7 +40,7 @@ func NewHybridCSPRNG() *HybridCSPRNG {
 
 // Name returns the generator name
 func (h *HybridCSPRNG) Name() string {
-	return "Hybrid PRNG (Weather + System)"
+	return "Hybrid PRNG"
 }
 
 // getWeatherEntropy efficiently gathers weather data
