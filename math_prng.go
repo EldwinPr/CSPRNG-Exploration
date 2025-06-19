@@ -6,28 +6,28 @@ import (
 	"time"
 )
 
-// InsecurePRNG implements a simple insecure PRNG using math/rand
-type InsecurePRNG struct {
+// MathPRNG implements a simple Math PRNG using math/rand
+type MathPRNG struct {
 	rng  *rand.Rand
 	lock sync.Mutex
 }
 
-// NewInsecurePRNG creates a new insecure PRNG
-func NewInsecurePRNG() *InsecurePRNG {
+// NewMathPRNG creates a new Math PRNG
+func NewMathPRNG() *MathPRNG {
 	// Seed with predictable time
 	source := rand.NewSource(time.Now().UnixNano())
-	return &InsecurePRNG{
+	return &MathPRNG{
 		rng: rand.New(source),
 	}
 }
 
 // Name returns the generator name
-func (p *InsecurePRNG) Name() string {
-	return "Insecure PRNG"
+func (p *MathPRNG) Name() string {
+	return "Math PRNG"
 }
 
 // GenerateBytes generates bytes using math/rand
-func (p *InsecurePRNG) GenerateBytes(numBytes int) ([]byte, error) {
+func (p *MathPRNG) GenerateBytes(numBytes int) ([]byte, error) {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 

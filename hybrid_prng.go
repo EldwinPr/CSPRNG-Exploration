@@ -13,18 +13,18 @@ import (
 	"time"
 )
 
-// HybridCSPRNG implements a high-performance hybrid CSPRNG
+// HybridCSPRNG implements a hybrid cryptographically secure pseudo-random number generator
+// combining weather data entropy with system entropy
 type HybridCSPRNG struct {
 	state   []byte
 	counter uint64
 	mutex   sync.Mutex
 }
 
-// NewHybridCSPRNG creates a new hybrid CSPRNG
+// NewHybridCSPRNG creates a new hybrid CSPRNG with combined entropy sources
 func NewHybridCSPRNG() *HybridCSPRNG {
 	h := &HybridCSPRNG{}
 
-	// Hybrid seeding: Weather + System CSPRNG
 	weatherEntropy := h.getWeatherEntropy()
 	systemEntropy := make([]byte, 32)
 	if _, err := rand.Read(systemEntropy); err != nil {
@@ -43,7 +43,7 @@ func (h *HybridCSPRNG) Name() string {
 	return "Hybrid PRNG"
 }
 
-// getWeatherEntropy efficiently gathers weather data
+// getWeatherEntropy fetches weather data as entropy source
 func (h *HybridCSPRNG) getWeatherEntropy() []byte {
 	client := &http.Client{Timeout: 1 * time.Second}
 	start := time.Now()
@@ -60,11 +60,10 @@ func (h *HybridCSPRNG) getWeatherEntropy() []byte {
 		return []byte(fmt.Sprintf("readerror:%d", duration.Nanoseconds()))
 	}
 
-	// Include timing in entropy
 	return append(body, []byte(strconv.FormatInt(duration.Nanoseconds(), 10))...)
 }
 
-// GenerateBytes generates bytes with high performance
+// GenerateBytes generates cryptographically secure random bytes
 func (h *HybridCSPRNG) GenerateBytes(numBytes int) ([]byte, error) {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
@@ -73,14 +72,14 @@ func (h *HybridCSPRNG) GenerateBytes(numBytes int) ([]byte, error) {
 	generated := 0
 
 	for generated < numBytes {
-		// Fast HMAC generation
+
+		// Use HMAC with the current state and counter to generate random bytes
 		mac := hmac.New(sha256.New, h.state)
 		counterBytes := make([]byte, 8)
 		binary.BigEndian.PutUint64(counterBytes, h.counter)
 		mac.Write(counterBytes)
 		block := mac.Sum(nil)
 
-		// Copy as much as needed
 		toCopy := len(block)
 		if remaining := numBytes - generated; remaining < toCopy {
 			toCopy = remaining
@@ -91,7 +90,6 @@ func (h *HybridCSPRNG) GenerateBytes(numBytes int) ([]byte, error) {
 		h.counter++
 	}
 
-	// Efficient state update
 	mac := hmac.New(sha256.New, h.state)
 	mac.Write([]byte("update"))
 	mac.Write(result[:min(32, len(result))])
