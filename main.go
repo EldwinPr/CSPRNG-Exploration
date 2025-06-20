@@ -183,8 +183,8 @@ func printResults(results []TestResult) {
 
 func main() {
 	// Configuration
-	iterations := 10000
-	dataSize := 1024 * 16
+	iterations := 1000
+	dataSize := 1024 * 128
 
 	fmt.Printf("🎲 PRNG Benchmark Suite\n")
 	fmt.Printf("Iterations: %d | Data Size: %d bytes\n", iterations, dataSize)
